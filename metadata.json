@@ -1,0 +1,5 @@
+{
+  "name": "IFConnected",
+  "description": "A minimalist social network client connected to a Spring Boot backend.",
+  "requestFramePermissions": []
+}
