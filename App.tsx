@@ -6,7 +6,7 @@ import { User, Post } from './types';
 import { api } from './services/api';
 import { Avatar } from './components/Avatar';
 import { LogOut, Search, User as UserIcon } from 'lucide-react';
-
+// testeeeeeeeee
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [viewUserId, setViewUserId] = useState<number>(1);
