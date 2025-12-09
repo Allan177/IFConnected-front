@@ -1,135 +1,145 @@
-import React, { useState } from 'react';
-import { Post, User, Comment } from '../types';
-import { api } from '../services/api';
-import { Avatar } from './Avatar';
-import { Button } from './Button';
-import { MessageCircle, Heart, Share2, Send } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Post, User } from "../types";
+import { api } from "../services/api";
+import { MessageCircle, Heart, Share2, UserPlus, Check } from "lucide-react";
 
 interface PostCardProps {
   post: Post;
-  currentUser: User;
+  currentUser: User | null;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({ post, currentUser }) => {
-  const [comments, setComments] = useState<Comment[]>(post.comments || []);
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-  const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Estado para armazenar os dados do autor do post (buscado pelo ID)
+  const [author, setAuthor] = useState<User | null>(null);
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
+  // Estado visual para saber se já seguiu (apenas visual, reseta ao recarregar)
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
 
-    setIsSubmitting(true);
+  // 1. Busca os dados do autor do post assim que o componente carrega
+  useEffect(() => {
+    // Se o backend mandasse o objeto author dentro do post, não precisaria disso.
+    // Mas como manda só userId, buscamos o nome para ficar bonito.
+    api
+      .getUserById(post.userId)
+      .then(setAuthor)
+      .catch(() => console.error("Erro ao carregar autor"));
+  }, [post.userId]);
+
+  // 2. Função de Seguir
+  const handleFollow = async () => {
+    if (!currentUser || !author) return;
+
+    setLoadingFollow(true);
     try {
-      const addedComment = await api.addComment(post.id, {
-        userId: currentUser.id,
-        text: newComment
-      });
-      // Backend might return the comment but lacks the full user info sometimes.
-      // We'll optimistically add it or assume backend returns sufficient data
-      const commentWithUser = { ...addedComment, username: currentUser.username };
-      setComments([...comments, commentWithUser]);
-      setNewComment('');
+      await api.followUser(currentUser.id, author.id);
+      setIsFollowing(true); // Muda o botão para "Seguindo"
     } catch (error) {
-      console.error("Failed to add comment", error);
+      alert("Erro ao seguir usuário.");
     } finally {
-      setIsSubmitting(false);
+      setLoadingFollow(false);
     }
   };
 
+  // Verifica se o post é do próprio usuário logado (não pode seguir a si mesmo)
+  const isOwnPost = currentUser?.id === post.userId;
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 mb-4 overflow-hidden hover:shadow-md transition-shadow duration-300">
-      <div className="p-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <Avatar name={`User ${post.userId}`} />
-            <div>
-              <h3 className="font-semibold text-slate-900">User {post.userId}</h3>
-              <p className="text-xs text-slate-500">
-                {/* Mock date if backend doesn't send it, else format it */}
-                {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Just now'}
-              </p>
+    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-100 transition-all hover:shadow-md">
+      {/* CABEÇALHO DO POST */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* Avatar (Placeholder com a inicial) */}
+          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200">
+            {author ? author.username.charAt(0).toUpperCase() : "?"}
+          </div>
+
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-900 text-sm">
+                {author ? author.username : `User ${post.userId}`}
+              </span>
+
+              {/* --- BOTÃO SEGUIR --- */}
+              {!isOwnPost && (
+                <>
+                  <span className="text-slate-300 text-xs">•</span>
+                  {isFollowing ? (
+                    <span className="text-xs font-bold text-green-600 flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-full">
+                      <Check size={12} /> Seguindo
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleFollow}
+                      disabled={loadingFollow}
+                      className="text-indigo-600 text-xs font-bold hover:underline flex items-center gap-1 transition-colors disabled:opacity-50"
+                    >
+                      {loadingFollow ? "..." : "Seguir"}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
+
+            <span className="text-xs text-slate-400">
+              {/* Formatação simples de data */}
+              {post.createdAt
+                ? new Date(post.createdAt).toLocaleDateString()
+                : "Just now"}
+            </span>
           </div>
-        </div>
-
-        {/* Content */}
-        <p className="text-slate-800 mb-4 whitespace-pre-wrap leading-relaxed">{post.content}</p>
-
-        {/* Image Attachment */}
-        {post.imageUrl && (
-          <div className="mb-4 -mx-4 md:mx-0">
-            <img 
-              src={post.imageUrl} 
-              alt="Post attachment" 
-              className="w-full h-auto md:rounded-xl object-cover max-h-[500px] bg-slate-50"
-              loading="lazy"
-            />
-          </div>
-        )}
-
-        {/* Action Bar */}
-        <div className="flex items-center gap-6 text-slate-500 pt-2 border-t border-slate-50">
-          <button 
-            className="flex items-center gap-2 hover:text-indigo-600 transition-colors"
-            onClick={() => setIsCommentsOpen(!isCommentsOpen)}
-          >
-            <MessageCircle size={20} />
-            <span className="text-sm font-medium">{comments.length}</span>
-          </button>
-          <button className="flex items-center gap-2 hover:text-rose-500 transition-colors group">
-            <Heart size={20} className="group-hover:fill-rose-500" />
-            <span className="text-sm font-medium">Like</span>
-          </button>
-          <button className="flex items-center gap-2 hover:text-blue-500 transition-colors">
-            <Share2 size={20} />
-          </button>
         </div>
       </div>
 
-      {/* Comments Section */}
-      {isCommentsOpen && (
-        <div className="bg-slate-50 p-4 border-t border-slate-100">
-          {/* List */}
-          <div className="space-y-4 mb-4">
-            {comments.length === 0 && (
-              <p className="text-slate-400 text-sm text-center italic">No comments yet. Be the first!</p>
-            )}
-            {comments.map((comment, idx) => (
-              <div key={comment.id || idx} className="flex gap-3">
-                <Avatar name={comment.username || `User ${comment.userId}`} size="sm" />
-                <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm flex-1">
-                  <p className="text-xs font-bold text-slate-700 mb-1">
-                    {comment.username || `User ${comment.userId}`}
-                  </p>
-                  <p className="text-sm text-slate-800">{comment.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* CONTEÚDO TEXTO */}
+      <p className="text-slate-800 text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+        {post.content}
+      </p>
 
-          {/* Input */}
-          <form onSubmit={handleCommentSubmit} className="flex gap-2">
-             <Avatar name={currentUser.username} size="sm" />
-             <div className="flex-1 relative">
-               <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Write a comment..."
-                className="w-full pl-4 pr-12 py-2 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm"
-               />
-               <button 
-                type="submit"
-                disabled={!newComment.trim() || isSubmitting}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-600 disabled:text-slate-300 p-1 hover:bg-indigo-50 rounded-full transition-colors"
-               >
-                 <Send size={16} />
-               </button>
-             </div>
-          </form>
+      {/* CONTEÚDO IMAGEM (Se houver) */}
+      {post.imageUrl && (
+        <div className="rounded-lg overflow-hidden border border-slate-100 mb-4 bg-slate-50">
+          <img
+            src={post.imageUrl}
+            alt="Post content"
+            className="w-full h-auto object-cover max-h-[500px]"
+            loading="lazy"
+            onError={(e) => {
+              // Esconde imagem quebrada
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        </div>
+      )}
+
+      {/* RODAPÉ (Ações Mockadas) */}
+      <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+        <button className="flex items-center gap-2 text-slate-400 hover:text-red-500 text-sm transition-colors group">
+          <Heart size={18} className="group-hover:fill-red-500/20" />
+          <span>Curtir</span>
+        </button>
+
+        <button className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 text-sm transition-colors">
+          <MessageCircle size={18} />
+          <span>{post.comments ? post.comments.length : 0} Comentários</span>
+        </button>
+
+        <button className="flex items-center gap-2 text-slate-400 hover:text-green-600 text-sm transition-colors">
+          <Share2 size={18} />
+        </button>
+      </div>
+
+      {/* LISTA DE COMENTÁRIOS (Simplificada) */}
+      {post.comments && post.comments.length > 0 && (
+        <div className="mt-4 bg-slate-50 rounded-lg p-3 space-y-2">
+          {post.comments.map((comment) => (
+            <div key={comment.id} className="text-xs">
+              <span className="font-bold text-slate-700 mr-2">
+                User {comment.userId}:
+              </span>
+              <span className="text-slate-600">{comment.text}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -1,20 +1,22 @@
-import React, { useState, useRef } from 'react';
-import { User, Post } from '../types';
-import { api } from '../services/api';
-import { Button } from './Button';
-import { Image as ImageIcon, X, Send } from 'lucide-react';
-import { Avatar } from './Avatar';
+import React, { useState, useRef } from "react";
+import { User, Post } from "../types";
+import { api } from "../services/api";
+import { Image as ImageIcon, Send, X, Loader2 } from "lucide-react";
 
 interface CreatePostProps {
   currentUser: User;
   onPostCreated: (post: Post) => void;
 }
 
-export const CreatePost: React.FC<CreatePostProps> = ({ currentUser, onPostCreated }) => {
-  const [content, setContent] = useState('');
+export const CreatePost: React.FC<CreatePostProps> = ({
+  currentUser,
+  onPostCreated,
+}) => {
+  const [content, setContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,91 +27,108 @@ export const CreatePost: React.FC<CreatePostProps> = ({ currentUser, onPostCreat
     }
   };
 
-  const removeImage = () => {
+  const clearFile = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() && !selectedFile) return;
 
-    setIsSubmitting(true);
+    setLoading(true);
     try {
-      const newPost = await api.createPost(currentUser.id, content, selectedFile);
-      onPostCreated(newPost);
-      // Reset form
-      setContent('');
-      removeImage();
+      const newPost = await api.createPost(
+        currentUser.id,
+        content,
+        selectedFile
+      );
+      onPostCreated(newPost); // Avisa o pai que criou
+
+      // Limpa tudo
+      setContent("");
+      clearFile();
     } catch (error) {
-      console.error("Failed to post", error);
-      alert("Failed to create post. Check console.");
+      alert("Erro ao criar post");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6">
-      <div className="flex gap-4">
-        <Avatar name={currentUser.username} size="md" />
-        <div className="flex-1">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="What's happening?"
-            className="w-full resize-none border-none focus:ring-0 text-slate-700 placeholder-slate-400 text-lg min-h-[60px]"
-            rows={2}
-          />
-          
-          {previewUrl && (
-            <div className="relative mt-2 mb-4">
-              <img 
-                src={previewUrl} 
-                alt="Preview" 
-                className="rounded-xl max-h-64 object-cover border border-slate-100"
-              />
-              <button 
-                onClick={removeImage}
-                className="absolute top-2 left-2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-6">
+      <form onSubmit={handleSubmit}>
+        <div className="flex gap-4">
+          {/* Avatar Pequeno */}
+          <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+            {currentUser.username.charAt(0).toUpperCase()}
+          </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-50 mt-2">
-            <div className="flex items-center gap-2">
-              <button 
-                type="button"
+          <div className="flex-1">
+            <textarea
+              className="w-full bg-transparent outline-none text-slate-700 placeholder:text-slate-400 resize-none h-12 py-2"
+              placeholder="O que está acontecendo?"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+            />
+
+            {/* Preview da Imagem */}
+            {previewUrl && (
+              <div className="relative mt-2 mb-4 w-fit">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="max-h-60 rounded-lg border border-slate-200"
+                />
+                <button
+                  type="button"
+                  onClick={clearFile}
+                  className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50">
+              {/* Botão de Imagem */}
+              <div
+                className="text-indigo-500 cursor-pointer p-2 hover:bg-indigo-50 rounded-full transition-colors"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-indigo-600 hover:bg-indigo-50 p-2 rounded-full transition-colors"
+                title="Adicionar foto"
               >
                 <ImageIcon size={20} />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                />
+              </div>
+
+              {/* Botão de Enviar */}
+              <button
+                type="submit"
+                disabled={loading || (!content && !selectedFile)}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-2 transition-all"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Postando...
+                  </>
+                ) : (
+                  <>
+                    Publicar <Send size={14} />
+                  </>
+                )}
               </button>
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileSelect}
-              />
             </div>
-            
-            <Button 
-              onClick={handleSubmit} 
-              isLoading={isSubmitting}
-              disabled={!content.trim() && !selectedFile}
-              className="rounded-full px-6"
-            >
-              <span className="mr-2">Post</span> <Send size={16} />
-            </Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

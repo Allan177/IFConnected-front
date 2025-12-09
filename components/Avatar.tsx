@@ -1,22 +1,43 @@
-import React from 'react';
+import React from "react";
 
 interface AvatarProps {
-  name?: string;
-  size?: 'sm' | 'md' | 'lg';
+  name: string;
+  src?: string; // URL da imagem (opcional)
+  size?: "sm" | "md" | "lg" | "xl"; // Adicionei XL para o modal
 }
 
-export const Avatar: React.FC<AvatarProps> = ({ name = 'User', size = 'md' }) => {
-  const initials = name.substring(0, 2).toUpperCase();
-  
+export const Avatar: React.FC<AvatarProps> = ({ name, src, size = "md" }) => {
+  const initial = name ? name.charAt(0).toUpperCase() : "?";
+
   const sizeClasses = {
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm',
-    lg: 'w-14 h-14 text-base',
+    sm: "w-8 h-8 text-xs",
+    md: "w-10 h-10 text-sm",
+    lg: "w-16 h-16 text-xl",
+    xl: "w-24 h-24 text-3xl",
   };
 
+  // Se tiver imagem (src), renderiza ela
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className={`${sizeClasses[size]} rounded-full object-cover border border-slate-200 shrink-0 bg-white`}
+        onError={(e) => {
+          // Se a imagem falhar (link quebrado), esconde e mostra o fallback
+          e.currentTarget.style.display = "none";
+          e.currentTarget.parentElement?.classList.remove("bg-white"); // Remove fundo branco
+        }}
+      />
+    );
+  }
+
+  // Fallback: Bolinha com inicial
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold ring-2 ring-white shadow-sm shrink-0`}>
-      {initials}
+    <div
+      className={`${sizeClasses[size]} rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold border border-indigo-200 shrink-0`}
+    >
+      {initial}
     </div>
   );
 };

@@ -2,25 +2,29 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  bio?: string; // Novo: Texto da biografia
+  profileImageUrl?: string; // Novo: URL da foto no MinIO
 }
 
 export interface Comment {
-  id?: number;
+  id: number;
   userId: number;
   text: string;
-  // Optional: Backend might return username if we expanded the DTO, 
-  // otherwise we just show userId or generic avatar
-  username?: string; 
+  username?: string; // Opcional: Para facilitar a exibição no front
+  postedAt?: string; // Data do comentário
 }
 
 export interface Post {
   id: number;
-  userId: number; // The author ID
+  userId: number;
   content: string;
-  imageUrl?: string;
-  comments: Comment[];
-  createdAt?: string; // Optional if backend sends it
+  imageUrl?: string; // URL da imagem do post no MinIO
+  createdAt?: string; // Data em formato ISO
+  comments?: Comment[]; // Lista de comentários
+  likes?: number[]; // Novo: Lista de IDs dos usuários que curtiram
 }
+
+// --- DTOs (Objetos para envio de dados) ---
 
 export interface LoginRequest {
   username: string;

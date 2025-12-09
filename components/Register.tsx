@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { User } from "../types";
-import { api } from "../services/api";
+import { api } from "../services/api"; // Certifique-se que existe um método para criar user
 import { Button } from "./Button";
-import { LogIn, AlertCircle, WifiOff, UserPlus } from "lucide-react"; // Adicionei UserPlus
+import { UserPlus, AlertCircle, WifiOff, ArrowLeft } from "lucide-react";
 
-interface LoginProps {
-  onLogin: (user: User) => void;
-  onSwitchToRegister: () => void; // Nova prop para navegar
+interface RegisterProps {
+  onRegister: (user: User) => void;
+  onSwitchToLogin: () => void; // Nova prop para navegar entre telas
 }
 
-export const Login: React.FC<LoginProps> = ({
-  onLogin,
-  onSwitchToRegister,
+export const Register: React.FC<RegisterProps> = ({
+  onRegister,
+  onSwitchToLogin,
 }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -23,10 +23,12 @@ export const Login: React.FC<LoginProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const user = await api.login({ username, email });
-      onLogin(user);
+      // Geralmente a rota POST /api/users serve para cadastrar
+      // Se seu arquivo api.ts não tiver 'register', use o método que faz o POST
+      const user = await api.register({ username, email });
+      onRegister(user);
     } catch (err: any) {
-      setError(err.message || "Erro inesperado. Verifique o console.");
+      setError(err.message || "Erro ao criar conta. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -37,19 +39,19 @@ export const Login: React.FC<LoginProps> = ({
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100 relative overflow-hidden">
         {/* Header Visual */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-black/5 text-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-            <LogIn size={24} />
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <UserPlus size={24} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">IFConnected</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Crie sua conta</h1>
           <p className="text-slate-500 mt-2">
-            Sua mini rede social minimalista.
+            Junte-se ao IFConnected hoje mesmo.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Nome de Usuário
+              Escolha seu Usuário
             </label>
             <input
               type="text"
@@ -57,12 +59,16 @@ export const Login: React.FC<LoginProps> = ({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
-              placeholder="ex: joaosilva"
+              placeholder="ex: novousuario"
             />
+            <p className="text-xs text-slate-400 mt-1 ml-1">
+              Será seu nome público na rede.
+            </p>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Email
+              Seu melhor Email
             </label>
             <input
               type="email"
@@ -70,20 +76,21 @@ export const Login: React.FC<LoginProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
-              placeholder="joao@exemplo.com"
+              placeholder="voce@exemplo.com"
             />
           </div>
 
-          <div className="p-3 bg-blue-50 text-blue-700 text-xs rounded-lg flex gap-2 items-start border border-blue-100">
+          {/* Aviso sobre o Backend (Mantendo a consistência com o Login) */}
+          <div className="p-3 bg-indigo-50 text-indigo-700 text-xs rounded-lg flex gap-2 items-start border border-indigo-100">
             <WifiOff size={14} className="shrink-0 mt-0.5" />
             <div className="leading-relaxed">
-              <strong>Nota:</strong> Se o backend (Porta 8080) estiver
-              indisponível, entraremos em Modo Demo automaticamente.
+              <strong>Info:</strong> Ao clicar em cadastrar, você será conectado
+              diretamente ao backend na porta 8080.
             </div>
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 text-red-700 text-sm rounded-xl flex gap-3 items-start border border-red-100">
+            <div className="p-4 bg-red-50 text-red-700 text-sm rounded-xl flex gap-3 items-start border border-red-100 animate-pulse">
               <AlertCircle size={18} className="shrink-0 mt-0.5" />
               <div className="whitespace-pre-line leading-relaxed">{error}</div>
             </div>
@@ -91,24 +98,22 @@ export const Login: React.FC<LoginProps> = ({
 
           <Button
             type="submit"
-            className="w-full py-3 text-base"
+            className="w-full py-3 text-base font-semibold shadow-indigo-200 shadow-lg"
             isLoading={loading}
           >
-            Entrar
+            Cadastrar Gratuitamente
           </Button>
         </form>
 
-        {/* --- NOVO FOOTER PARA REGISTRO --- */}
+        {/* Footer: Link para voltar ao Login */}
         <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-          <p className="text-slate-500 text-sm mb-3">
-            Não tem uma conta ainda?
-          </p>
+          <p className="text-slate-500 text-sm mb-3">Já tem uma conta?</p>
           <button
-            onClick={onSwitchToRegister}
+            onClick={onSwitchToLogin}
             className="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center justify-center gap-2 mx-auto transition-colors hover:underline"
           >
-            <UserPlus size={16} />
-            Criar conta agora
+            <ArrowLeft size={16} />
+            Voltar para o Login
           </button>
         </div>
       </div>
