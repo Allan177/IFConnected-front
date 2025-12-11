@@ -75,10 +75,33 @@ async function handleMockRequest<T>(
   }
 
   // 3. ATUALIZAR USUÁRIO (PUT)
+  // 3. ATUALIZAR USUÁRIO (PUT) - CORRIGIDO PARA ACEITAR FORMDATA
   if (endpoint.match(/\/users\/\d+$/) && options.method === "PUT") {
-    const body = JSON.parse(options.body as string) as User;
-    // Retorna o próprio objeto atualizado
-    return body as T;
+    // Verifica se é FormData (vem do Modal com foto) ou JSON
+    if (options.body instanceof FormData) {
+        const formData = options.body;
+        // Simula atualização extraindo dados do FormData
+        const updatedUser = {
+            id: parseInt(endpoint.split("/").pop() || "1"),
+            username: formData.get("username") as string,
+            bio: formData.get("bio") as string,
+            // Se tiver arquivo, cria URL fake, senão mantém a antiga (lógica simplificada)
+            profileImageUrl: formData.get("profileImage") 
+                ? URL.createObjectURL(formData.get("profileImage") as File) 
+                : undefined 
+        };
+        // Atualiza o array de mocks
+        const index = MOCK_USERS.findIndex(u => u.id === updatedUser.id);
+        if (index !== -1) {
+            MOCK_USERS[index] = { ...MOCK_USERS[index], ...updatedUser };
+            return MOCK_USERS[index] as T;
+        }
+        return updatedUser as T;
+    } else {
+        // Lógica antiga (JSON)
+        const body = JSON.parse(options.body as string) as User;
+        return body as T;
+    }
   }
 
   // 4. UPLOAD DE FOTO (POST)
@@ -160,8 +183,14 @@ export const api = {
   register: async (data: LoginRequest): Promise<User> => {
     return api.login(data);
   },
+  
+  updateProfileData: async (userId: number, formData: FormData): Promise<User> => {
+    return request<User>(`/users/${userId}`, {
+      method: "PUT",
+      body: formData, 
+    });
+  },
 
-  // --- O QUE ESTAVA FALTANDO 👇 ---
   updateUser: async (user: User): Promise<User> => {
     return request<User>(`/users/${user.id}`, {
       method: "PUT",
