@@ -3,7 +3,8 @@ export interface User {
   username: string;
   email: string;
   bio?: string; // Novo: Texto da biografia
-  profileImageUrl?: string; // Novo: URL da foto no MinIO
+  profileImageUrl?: string;
+  coverImageUrl?: string; // Novo: URL da foto no MinIO
 }
 
 export interface Comment {

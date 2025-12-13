@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Post, User } from "../types";
 import { api } from "../services/api";
-import { MessageCircle, Heart, Share2, UserPlus, Check } from "lucide-react";
+import { MessageCircle, Heart, Share2, Check } from "lucide-react";
 
 interface PostCardProps {
   post: Post;
   currentUser: User | null;
+  // Adicionamos esta prop para receber a função de navegação do App.tsx
+  onUserClick?: (userId: number) => void;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({ post, currentUser }) => {
+export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onUserClick }) => {
   // Estado para armazenar os dados do autor do post (buscado pelo ID)
   const [author, setAuthor] = useState<User | null>(null);
 
-  // Estado visual para saber se já seguiu (apenas visual, reseta ao recarregar)
+  // Estado visual para saber se já seguiu
   const [isFollowing, setIsFollowing] = useState(false);
   const [loadingFollow, setLoadingFollow] = useState(false);
 
   // 1. Busca os dados do autor do post assim que o componente carrega
   useEffect(() => {
-    // Se o backend mandasse o objeto author dentro do post, não precisaria disso.
-    // Mas como manda só userId, buscamos o nome para ficar bonito.
     api
       .getUserById(post.userId)
       .then(setAuthor)
@@ -41,7 +41,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser }) => {
     }
   };
 
-  // Verifica se o post é do próprio usuário logado (não pode seguir a si mesmo)
+  // Verifica se o post é do próprio usuário logado
   const isOwnPost = currentUser?.id === post.userId;
 
   return (
@@ -49,14 +49,32 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser }) => {
       {/* CABEÇALHO DO POST */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          {/* Avatar (Placeholder com a inicial) */}
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200">
-            {author ? author.username.charAt(0).toUpperCase() : "?"}
+          
+          {/* Avatar (Agora Clicável) */}
+          <div 
+            onClick={() => onUserClick && onUserClick(post.userId)}
+            className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200 cursor-pointer hover:opacity-80 transition"
+          >
+            {/* Se o autor já carregou e tem foto, mostra a foto, senão inicial */}
+            {author?.profileImageUrl ? (
+                <img 
+                    src={author.profileImageUrl} 
+                    alt={author.username} 
+                    className="w-full h-full rounded-full object-cover"
+                />
+            ) : (
+                <span>{author ? author.username.charAt(0).toUpperCase() : "?"}</span>
+            )}
           </div>
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 text-sm">
+              
+              {/* Nome do Usuário (Agora Clicável) */}
+              <span 
+                onClick={() => onUserClick && onUserClick(post.userId)}
+                className="font-bold text-slate-900 text-sm hover:underline cursor-pointer"
+              >
                 {author ? author.username : `User ${post.userId}`}
               </span>
 
@@ -82,7 +100,6 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser }) => {
             </div>
 
             <span className="text-xs text-slate-400">
-              {/* Formatação simples de data */}
               {post.createdAt
                 ? new Date(post.createdAt).toLocaleDateString()
                 : "Just now"}
@@ -105,7 +122,6 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser }) => {
             className="w-full h-auto object-cover max-h-[500px]"
             loading="lazy"
             onError={(e) => {
-              // Esconde imagem quebrada
               e.currentTarget.style.display = "none";
             }}
           />
