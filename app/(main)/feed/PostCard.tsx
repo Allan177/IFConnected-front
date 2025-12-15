@@ -1,18 +1,26 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Post, User } from "@/types";
-import { api } from "../../../services/api"; // Usar a API para buscar o nome do autor
-import { MessageCircle, Heart, Repeat2 } from "lucide-react";
+import { Post, User } from "@/types"; // Assumindo que você está usando o alias @
+import { api } from "@/services/api"; // Mude para @/services/api se o alias estiver funcionando
+import {
+  MessageCircle,
+  Heart,
+  Repeat2,
+  UserPlus,
+  Check,
+  Loader2,
+} from "lucide-react";
+
 import { useRouter } from "next/navigation";
 
 interface PostCardProps {
   post: Post;
-  // O usuário logado é passado para saber quem curtiu
   currentUser: User;
 }
 
 // MOCK para evitar erro de servidor quando o nome não for carregado
 const formatTimeAgo = (dateString?: string) => {
+  // ... (código da função formatTimeAgo)
   if (!dateString) return "agora";
   const seconds = Math.floor(
     (new Date().getTime() - new Date(dateString).getTime()) / 1000
@@ -29,27 +37,46 @@ const formatTimeAgo = (dateString?: string) => {
 export function PostCard({ post, currentUser }: PostCardProps) {
   const router = useRouter();
   const [authorName, setAuthorName] = useState(`User ${post.userId}`);
+
+  // --- NOVOS ESTADOS ---
+  const [author, setAuthor] = useState<User | null>(null); // Guardar o objeto autor
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
+  // --------------------
+
   const [isLiked, setIsLiked] = useState(
     post.likes?.includes(currentUser.id) || false
   );
   const [likeCount, setLikeCount] = useState(post.likes?.length || 0);
+  const isOwnPost = currentUser.id === post.userId;
 
-  // Efeito para buscar o nome do autor (só o ID vem do Mongo)
+  // 1. Efeito para buscar o nome do autor E o status de Follow
   useEffect(() => {
+    // Busca nome do Autor
     api
       .getUserById(post.userId)
-      .then((user) => setAuthorName(user.username))
+      .then((user) => {
+        setAuthorName(user.username);
+        setAuthor(user);
+      })
       .catch(() => setAuthorName(`ID #${post.userId}`));
-  }, [post.userId]);
+
+    // Checagem de Follow (Só se não for o próprio post)
+    if (!isOwnPost) {
+      api
+        .isFollowing(currentUser.id, post.userId)
+        .then(setIsFollowing) // Atualiza o estado inicial do botão
+        .catch(console.error);
+    }
+  }, [post.userId, currentUser.id, isOwnPost]);
 
   const handleLike = async () => {
+    // ... (Lógica do Like/Dislike permanece a mesma) ...
     const newLikeState = !isLiked;
     setIsLiked(newLikeState);
     setLikeCount((prev) => prev + (newLikeState ? 1 : -1));
 
-    // Lógica otimista: Chama o backend e reverte se der erro
     try {
-      // Rota POST /posts/{postId}/like?userId={id}
       await api.toggleLike(Number(post.id), currentUser.id);
     } catch (error) {
       setIsLiked(!newLikeState);
@@ -58,14 +85,38 @@ export function PostCard({ post, currentUser }: PostCardProps) {
     }
   };
 
-  // Navegar para o perfil
+  // --- 2. FUNÇÃO DE SEGUIR/DEIXAR DE SEGUIR (Alterna) ---
+  const handleFollowToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Previne ir para a página de perfil
+    if (!currentUser || !author || loadingFollow) return;
+
+    setLoadingFollow(true);
+    try {
+      if (isFollowing) {
+        // Ação: DEIXAR DE SEGUIR
+        await api.unfollowUser(currentUser.id, post.userId); // <--- CHAMADA CORRETA
+        setIsFollowing(false);
+      } else {
+        // Ação: SEGUIR
+        await api.followUser(currentUser.id, post.userId);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      alert(`Erro ao ${isFollowing ? "deixar de seguir" : "seguir"} usuário.`);
+      console.error(error);
+    } finally {
+      setLoadingFollow(false);
+    }
+  };
+  // ----------------------------------------------------
+
   const goToProfile = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evita que o click no card acione outras ações
+    e.stopPropagation();
     router.push(`/profile/${post.userId}`);
   };
 
   return (
-    <div className="bg-white dark:bg-black/5 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-900/90 cursor-pointer transition-colors">
+    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-900/90 cursor-pointer transition-colors">
       <div className="flex gap-3">
         {/* Avatar */}
         <div
@@ -91,6 +142,38 @@ export function PostCard({ post, currentUser }: PostCardProps) {
             <span className="text-slate-500 dark:text-slate-400 text-xs">
               {formatTimeAgo(post.createdAt)}
             </span>
+
+            {/* --- BOTÃO SEGUIR/SEGUINDO --- */}
+            {!isOwnPost && (
+              <>
+                <span className="text-slate-300 dark:text-slate-700 text-xs">
+                  •
+                </span>
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={loadingFollow}
+                  className={`text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-1 
+                            ${
+                              isFollowing
+                                ? "text-green-600 hover:text-red-500"
+                                : "text-sky-500 hover:text-sky-600"
+                            }`}
+                >
+                  {loadingFollow ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : isFollowing ? (
+                    <>
+                      <Check size={14} /> Seguindo
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={14} /> Seguir
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+            {/* ------------------------------ */}
           </div>
 
           {/* Conteúdo */}
@@ -111,7 +194,6 @@ export function PostCard({ post, currentUser }: PostCardProps) {
 
           {/* Footer de Ações */}
           <div className="flex justify-between mt-3 max-w-md">
-            {/* Likes */}
             <button
               onClick={handleLike}
               className={`flex items-center gap-1 text-sm ${
@@ -125,13 +207,11 @@ export function PostCard({ post, currentUser }: PostCardProps) {
               <span>{likeCount}</span>
             </button>
 
-            {/* Comentários (Simples) */}
             <button className="flex items-center gap-1 text-sm text-slate-500 hover:text-sky-500 transition-colors">
               <MessageCircle size={18} />
               <span>{post.comments?.length || 0}</span>
             </button>
 
-            {/* Compartilhar (Simples) */}
             <button className="flex items-center gap-1 text-sm text-slate-500 hover:text-green-500 transition-colors">
               <Repeat2 size={18} />
             </button>

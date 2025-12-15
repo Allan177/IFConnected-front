@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import Sidebar from "./Sidebar"; // Componente da Sidebar
 import { Loader2 } from "lucide-react";
 import ThemeToggle from "../../components/ThemeToggle"; // Já criamos no rascunho
+import { SugestoesBar } from "@/features/suggestions/SugestoesBar";
 
 export default function MainLayout({
   children,
@@ -34,23 +35,20 @@ export default function MainLayout({
 
   // --- Layout de 3 Colunas (Twitter/X) ---
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-slate-50 transition-colors duration-500">
+    <div className="min-h-screen bg-white dark:bg-slate-900 ...">
       <div className="max-w-[1200px] mx-auto flex">
-        {/* COLUNA 1: SIDEBAR (Menu Fixo) */}
+        {/* COLUNA 1: SIDEBAR */}
         <Sidebar user={user!} />
 
-        {/* COLUNA 2: FEED (Main Content) */}
+        {/* COLUNA 2: FEED */}
         <main className="flex-1 min-h-screen border-x border-slate-200 dark:border-slate-800 md:ml-[275px] w-full">
           {children}
         </main>
 
-        {/* COLUNA 3: SUGESTÕES (Hidden em telas menores) */}
+        {/* COLUNA 3: SUGESTÕES */}
         <aside className="w-80 p-4 sticky top-0 hidden lg:block h-screen">
-          <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
-            <h3 className="font-bold text-lg mb-3">Sugestões para Você</h3>
-            {/* Aqui virá a lógica de Pessoas que você talvez conheça */}
-            <p className="text-sm text-slate-500">Em breve...</p>
-          </div>
+          {/* Renderiza a barra de sugestões */}
+          <SugestoesBar />
         </aside>
       </div>
     </div>

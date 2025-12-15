@@ -2,7 +2,8 @@
 
 export const API_BASE_URL = "http://localhost:8080/api";
 
-export async function httpClient<T>(
+// --- MUDANÇA: Renomeado de httpClient para request ---
+export async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -30,3 +31,4 @@ export async function httpClient<T>(
   const text = await response.text();
   return text ? JSON.parse(text) : undefined; // Trata resposta vazia (void)
 }
+// Agora este arquivo exporta a função 'request'
