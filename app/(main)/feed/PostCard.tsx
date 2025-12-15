@@ -116,7 +116,7 @@ export function PostCard({ post, currentUser }: PostCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-900/90 cursor-pointer transition-colors">
+    <div className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-zinc-950 cursor-pointer transition-colors">
       <div className="flex gap-3">
         {/* Avatar */}
         <div

@@ -24,11 +24,11 @@ const NavItem = ({
       href={href}
       className={`flex items-center gap-4 p-3 rounded-full transition-colors font-bold text-lg w-fit xl:w-full ${
         isActive
-          ? "text-orange-700"
-          : "text-slate-900 dark:text-slate-50 hover:bg-slate-100 dark:hover:bg-orange-900/50"
+          ? "text-sky-700"
+          : "text-slate-900 dark:text-slate-50 hover:bg-slate-100 dark:hover:bg-sky-700/20"
       }`}
     >
-      <Icon size={26} className={isActive ? "text-orange-700" : ""} />
+      <Icon size={26} className={isActive ? "text-sky-600" : ""} />
       <span className="hidden xl:inline">{label}</span>
     </Link>
   );
@@ -63,9 +63,9 @@ export default function Sidebar({ user }: { user: User }) {
 
       {/* Rodapé da Sidebar: Usuário Logado e Configuração */}
       <div className="mt-auto w-full">
-        <div className="flex justify-between items-center w-full p-3 hover:bg-slate-100 dark:hover:bg-orange-700 rounded-full transition cursor-pointer">
+        <div className="flex justify-between items-center w-full p-3 hover:bg-slate-100 dark:hover:bg-zinc-800/20 rounded-full transition cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-700 rounded-full flex items-center justify-center font-bold text-white">
+            <div className="w-10 h-10 bg-zinc-800/10 rounded-full flex items-center justify-center font-bold text-white">
               {user.username[0].toUpperCase()}
             </div>
             <div className="hidden xl:block overflow-hidden">
@@ -80,7 +80,7 @@ export default function Sidebar({ user }: { user: User }) {
 
         <button
           onClick={logout}
-          className="mt-2 flex items-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-orange-700 w-full px-4 py-2 rounded-lg transition text-sm font-bold"
+          className="mt-2 flex items-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-zinc-800/10 cursor-pointer w-full px-4 py-2 rounded-lg transition text-sm font-bold"
         >
           <LogOut size={18} />{" "}
           <span className="hidden xl:inline">Sair da Conta</span>

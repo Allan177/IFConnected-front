@@ -129,7 +129,7 @@ export default function ProfilePage() {
       <div className="bg-white dark:bg-zinc-900 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-4">
         <button
           onClick={() => router.back()}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-full transition-colors"
         >
           <ArrowLeft size={20} />
         </button>
@@ -183,7 +183,7 @@ export default function ProfilePage() {
                 ${
                   isFollowing
                     ? isHoveringFollow
-                      ? "bg-red-600 text-white border border-red-600 hover:bg-red-700"
+                      ? "bg-sky-500 text-white border border-red-600 hover:bg-red-700"
                       : "bg-transparent text-black dark:text-white border border-slate-400 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800"
                     : "bg-black dark:bg-sky-500 text-white hover:opacity-90"
                 } w-36`}

@@ -35,13 +35,13 @@ export default function MainLayout({
 
   // --- Layout de 3 Colunas (Twitter/X) ---
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 ...">
+    <div className="min-h-screen bg-white dark:bg-zinc-900 ...">
       <div className="max-w-[1200px] mx-auto flex">
         {/* COLUNA 1: SIDEBAR */}
         <Sidebar user={user!} />
 
         {/* COLUNA 2: FEED */}
-        <main className="flex-1 min-h-screen border-x border-slate-200 dark:border-slate-800 md:ml-[275px] w-full">
+        <main className="flex-1 min-h-screen border-x border-slate-200 dark:border-zinc-900 md:ml-[275px] w-full">
           {children}
         </main>
 

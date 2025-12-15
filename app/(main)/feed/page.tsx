@@ -79,7 +79,7 @@ export default function FeedPage() {
         >
           {item.label}
           {activeTab === item.id && (
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-orange-700 rounded-t-full"></div>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-sky-600 rounded-t-full"></div>
           )}
         </button>
       ))}
@@ -91,7 +91,7 @@ export default function FeedPage() {
       <FeedHeader />
 
       {/* Área de Criação de Post (Substitua pelo componente real CreatePost) */}
-      <div className="border-b border-slate-200 dark:border-slate-800">
+      <div className="border-b border-slate-200 dark:border-y-zinc-800">
         {/* Aqui você chamaria o componente CreatePost */}
         <CreatePost user={user!} onPostCreated={handlePostCreated} />
       </div>
@@ -99,14 +99,14 @@ export default function FeedPage() {
       {/* Feed Content */}
       {loading ? (
         <div className="p-10 text-center">
-          <Loader2 className="animate-spin text-orange-700 mx-auto" size={24} />
+          <Loader2 className="animate-spin text-sky-600 mx-auto" size={24} />
         </div>
       ) : error ? (
         <div className="p-10 text-center text-red-600 border border-red-200 rounded-xl m-4 bg-red-50">
           <p>{error}</p>
           <button
             onClick={fetchPosts}
-            className="mt-3 text-orange-700 font-bold flex items-center gap-2 mx-auto hover:underline"
+            className="mt-3 text-sky-600 font-bold flex items-center gap-2 mx-auto hover:underline"
           >
             <RefreshCw size={16} /> Tentar novamente
           </button>

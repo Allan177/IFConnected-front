@@ -125,7 +125,7 @@ export function PostCard({ post, currentUser }: PostCardProps) {
   return (
     <div
       onClick={goToProfile}
-      className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] cursor-pointer transition-colors"
+      className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-900 p-4 hover:bg-slate-50 dark:hover:bg-white/[0.03] cursor-pointer transition-colors"
     >
       <div className="flex gap-3">
         {/* Avatar com inicial */}
