@@ -65,7 +65,7 @@ export default function FeedPage() {
 
   // Componente de Cabeçalho do Feed (Abas)
   const FeedHeader = () => (
-    <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
+    <div className="flex border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-zinc-900 sticky top-0 z-10">
       {tabItems.map((item) => (
         <button
           key={item.id}

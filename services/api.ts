@@ -22,6 +22,18 @@ export const api = {
       method: "POST",
     }),
 
+  // --- ADICIONE ESTE MÉTODO (ou garanta que ele está lá) ---
+  getUserProfile: (userId: number) => {
+    // Usa a função request base para chamar a rota /users/{id}/profile
+    return request<any>(`/users/${userId}/profile`);
+  },
+
+  // ...
+  // E certifique-se que o isFollowing também está lá para o PostCard:
+  isFollowing: (followerId: number, followedId: number) =>
+    request<boolean>(`/users/${followerId}/isFollowing/${followedId}`),
+  // ...
+
   // Rota de Deixar de Seguir (DELETE)
   unfollowUser: (followerId: number, followedId: number) =>
     request<void>(`/users/${followerId}/follow/${followedId}`, {
