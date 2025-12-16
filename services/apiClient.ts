@@ -1,8 +1,5 @@
-// src/services/apiClient.ts
-
 export const API_BASE_URL = "http://localhost:8080/api";
 
-// --- MUDANÇA: Renomeado de httpClient para request ---
 export async function request<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -11,24 +8,38 @@ export async function request<T>(
 
   const headers = {
     "Content-Type": "application/json",
-    // Adicionar token JWT aqui no futuro, por enquanto sem token
     ...options.headers,
   };
 
-  // Trata FormData (upload de arquivo)
   if (options.body instanceof FormData) {
     delete (headers as any)["Content-Type"];
   }
 
-  const response = await fetch(url, { ...options, headers });
+  try {
+    const response = await fetch(url, { ...options, headers });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    // Lança o erro bonitinho que o Backend manda
-    throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+    // Tenta ler o corpo da resposta (pode ser vazio ou JSON)
+    const text = await response.text();
+    let data: any = {};
+
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.warn("Resposta não é JSON válido:", text);
+      }
+    }
+
+    if (!response.ok) {
+      // Se o backend mandou uma mensagem de erro (ex: "No value present"), usamos ela
+      const errorMessage =
+        data.message || data.error || `Erro HTTP: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    return data as T;
+  } catch (error: any) {
+    console.error(`Erro na requisição para ${endpoint}:`, error.message);
+    throw error;
   }
-
-  const text = await response.text();
-  return text ? JSON.parse(text) : undefined; // Trata resposta vazia (void)
 }
-// Agora este arquivo exporta a função 'request'
