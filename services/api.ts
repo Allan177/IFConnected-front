@@ -2,7 +2,14 @@
 
 import { authService } from "./authService";
 import { postService } from "./postService";
-import { User, LoginRequest, RegisterRequest, Post } from "@/types";
+import {
+  User,
+  LoginRequest,
+  RegisterRequest,
+  Post,
+  Event,
+  CreateEventRequest,
+} from "@/types";
 import { request } from "./apiClient";
 
 // Interface para o body do comentário (Front-end)
@@ -73,4 +80,28 @@ export const api = {
 
   markNotificationsAsRead: (userId: number) =>
     request<void>(`/notifications/user/${userId}/read`, { method: "PUT" }),
+
+  createEvent: (data: CreateEventRequest) =>
+    request<Event>("/events", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // GET /api/events/campus/{campusId}
+  getEventsByCampus: (campusId: number) =>
+    request<Event[]>(`/events/campus/${campusId}`),
+
+  // POST /api/events/{id}/join?userId=...
+  joinEvent: (eventId: number, userId: number) =>
+    request<void>(`/events/${eventId}/join?userId=${userId}`, {
+      method: "POST",
+    }),
+
+  // POST /api/events/{id}/leave?userId=...
+  leaveEvent: (eventId: number, userId: number) =>
+    request<void>(`/events/${eventId}/leave?userId=${userId}`, {
+      method: "POST",
+    }),
+
+  // ...
 };

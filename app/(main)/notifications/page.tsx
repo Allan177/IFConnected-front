@@ -69,7 +69,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen pb-10">
-      <div className="bg-white dark:bg-slate-900 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 px-4 py-3">
+      <div className="bg-white dark:bg-zinc-900 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 px-4 py-3">
         <h1 className="font-bold text-xl">Notificações</h1>
       </div>
 

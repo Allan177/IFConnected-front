@@ -1,7 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, User as UserIcon, MapPin, LogOut, Bell } from "lucide-react"; // <--- Adicione Bell
+import {
+  Home,
+  User as UserIcon,
+  MapPin,
+  LogOut,
+  Bell,
+  Calendar,
+} from "lucide-react"; // <--- Adicione Bell
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { User } from "../../types/index";
@@ -52,6 +59,7 @@ export default function Sidebar({ user }: { user: User }) {
         <NavItem href="/feed" icon={Home} label="Feed Principal" />
         <NavItem href="/regional" icon={MapPin} label="Campus & Perto" />
         <NavItem href="/notifications" icon={Bell} label="Notificações" />{" "}
+        <NavItem href="/events" icon={Calendar} label="Eventos" />{" "}
         <NavItem href={`/profile/${userId}`} icon={UserIcon} label="Perfil" />
         {/* Botão para Postar (Em breve) */}
         <button className="mt-4 bg-sky-400 0 text-white w-fit xl:w-full py-3 px-6 rounded-full font-bold text-lg shadow-lg hover:bg-sky-500 transition">

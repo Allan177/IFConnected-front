@@ -166,7 +166,7 @@ export function PostCard({ post, currentUser }: PostCardProps) {
   return (
     <div
       onClick={goToPost} // <--- MUDANÇA: O card leva ao Post
-      className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
+      className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-900 p-4 hover:bg-slate-50 dark:hover:bg-zinc-950 cursor-pointer transition-colors"
     >
       <div className="flex gap-3">
         {/* Avatar - Leva ao Perfil */}
