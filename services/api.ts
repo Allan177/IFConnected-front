@@ -127,5 +127,15 @@ export const api = {
       method: "POST",
     }),
 
-  // ...
+  updateEvent: (id: number, data: Partial<CreateEventRequest>) =>
+    request<Event>(`/events/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // DELETE /api/events/{id}
+  deleteEvent: (id: number) =>
+    request<void>(`/events/${id}`, {
+      method: "DELETE",
+    }),
 };
