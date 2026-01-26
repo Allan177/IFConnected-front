@@ -88,7 +88,7 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen pb-10">
       {/* Header Fixo */}
-      <div className="bg-white dark:bg-slate-900 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex justify-between items-center">
+      <div className="bg-white dark:bg-zinc-900 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex justify-between items-center">
         <h1 className="font-bold text-xl flex items-center gap-2">
           <Calendar className="text-sky-500" /> Eventos
         </h1>

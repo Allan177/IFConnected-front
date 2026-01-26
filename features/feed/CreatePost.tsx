@@ -90,7 +90,7 @@ export default function CreatePost({ user, onPostCreated }: CreatePostProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white dark:bg-gray-950/90 border-b border-slate-200 dark:border-slate-800 p-4"
+      className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-slate-800 p-4"
     >
       <div className="flex gap-3">
         {/* ✅ Avatar real */}

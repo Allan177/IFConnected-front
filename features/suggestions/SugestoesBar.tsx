@@ -41,7 +41,7 @@ export function SugestoesBar() {
   }, [user]);
 
   return (
-    <div className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-xl sticky top-4">
+    <div className="w-full bg-slate-50 dark:bg-zinc-700/10 p-4 rounded-xl sticky top-4">
       <h3 className="font-extrabold text-xl mb-4 text-slate-900 dark:text-slate-50 flex items-center gap-2">
         <Zap size={20} className="text-sky-500" /> Quem Seguir
       </h3>

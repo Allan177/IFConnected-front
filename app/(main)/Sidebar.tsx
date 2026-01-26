@@ -104,7 +104,6 @@ export default function Sidebar({ user }: { user: User | null }) {
               </p>
             </div>
           </div>
-          <ThemeToggle /> {/* Botão de Modo Escuro */}
         </div>
 
         <button

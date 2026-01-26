@@ -62,9 +62,9 @@ export function EventCard({
   const date = new Date(event.eventDate);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex gap-4 group">
+    <div className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-y-zinc-900 p-4 hover:bg-slate-50 dark:hover:bg-zinc-950 transition-colors flex gap-4 group">
       {/* Coluna da Data (Estilo Calendário) */}
-      <div className="flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl h-20 w-20 shrink-0 border border-slate-200 dark:border-slate-700">
+      <div className="flex flex-col items-center justify-center bg-slate-100 dark:bg-zinc-900 rounded-xl h-20 w-20 shrink-0 border border-slate-200 dark:border-slate-700">
         <span className="text-xs font-bold text-red-500 uppercase">
           {format(date, "MMM", { locale: ptBR })}
         </span>
@@ -87,7 +87,6 @@ export function EventCard({
 
           {/* Área de Ações (Admin + Participar) */}
           <div className="flex items-center gap-2">
-            
             {/* Botões de Admin (Só aparecem para o criador) */}
             {isCreator && (
               <div className="flex gap-1 mr-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
@@ -116,7 +115,7 @@ export function EventCard({
                 ${
                   isParticipating
                     ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                    : "bg-slate-900 text-white dark:bg-white dark:text-black border-transparent hover:opacity-90"
+                    : "bg-zinc-900 text-white dark:bg-white dark:text-black border-transparent hover:opacity-90"
                 }
               `}
             >
