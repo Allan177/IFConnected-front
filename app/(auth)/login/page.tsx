@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/services/api";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+// 1. Import do Botão Google
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Login Padrão (Email/Senha)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -25,6 +28,45 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Credenciais inválidas. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. Handler do Login com Google
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setError("");
+    setLoading(true);
+    try {
+      const data = await api.loginGoogle(credentialResponse.credential);
+      
+      // data deve ser { token: "...", user: { ... } }
+      // Se seu backend retorna só o token, você precisa decodificar ou buscar o user aqui.
+      // Vou assumir que você ajustou o backend para retornar o UserDTO também, 
+      // ou que vamos buscar o perfil agora.
+
+      localStorage.setItem("ifconnected:token", data.token);
+      
+      // Busca o usuário atualizado para conferir o campus
+      // (Isso é necessário se o loginGoogle retornar só o token)
+      // Se loginGoogle já retorna o user, use data.user
+      const user = await api.getMe(); // Você precisa ter esse método ou decodificar do token
+      // Se não tiver getMe implementado fácil, use getUserById com o ID do token.
+      
+      // Lógica de Redirecionamento
+      if (!user.campusId) {
+        // Se não tem campus, manda completar
+        login(user); // Salva no contexto
+        window.location.href = "/complete-profile";
+      } else {
+        // Se já tem, vida normal
+        login(user);
+        window.location.href = "/feed";
+      }
+      
+    } catch (err: any) {
+      console.error("Erro Google", err);
+      setError("Falha ao autenticar com Google.");
     } finally {
       setLoading(false);
     }
@@ -53,7 +95,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Formulário */}
+        {/* Formulário Padrão */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email */}
           <div className="space-y-1">
@@ -95,7 +137,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Botão */}
+          {/* Botão Entrar */}
           <button
             type="submit"
             disabled={loading}
@@ -114,6 +156,27 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        {/* --- DIVISOR "OU" --- */}
+        <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-slate-200 dark:border-zinc-700"></div>
+            <span className="px-4 text-xs font-bold text-slate-400 uppercase">OU</span>
+            <div className="flex-1 border-t border-slate-200 dark:border-zinc-700"></div>
+        </div>
+
+        {/* --- BOTÃO GOOGLE --- */}
+        <div className="flex justify-center w-full">
+            <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Login com Google falhou')}
+                theme="filled_blue"
+                shape="pill"
+                size="large"
+                text="continue_with"
+                width="100%" // Tenta ocupar largura total, mas o componente tem limite
+                locale="pt-BR"
+            />
+        </div>
 
         {/* Rodapé */}
         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-zinc-800 text-center">

@@ -149,4 +149,14 @@ export const api = {
       method: "PUT",
       body: formData
     }),
+
+
+
+     loginGoogle: (token: string) => 
+      request<{ token: string }>("/auth/google", { 
+          method: "POST", 
+          body: JSON.stringify({ token }) 
+      }),
+  // ...
 };
+
