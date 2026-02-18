@@ -33,37 +33,27 @@ export default function LoginPage() {
     }
   };
 
-  // 2. Handler do Login com Google
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+ const handleGoogleSuccess = async (credentialResponse: any) => {
     setError("");
     setLoading(true);
     try {
+      // 1. Chama o backend
       const data = await api.loginGoogle(credentialResponse.credential);
       
-      // data deve ser { token: "...", user: { ... } }
-      // Se seu backend retorna só o token, você precisa decodificar ou buscar o user aqui.
-      // Vou assumir que você ajustou o backend para retornar o UserDTO também, 
-      // ou que vamos buscar o perfil agora.
+      // 2. data agora é { token: "...", user: { id: ..., campusId: ... } }
+      if (data.token && data.user) {
+        localStorage.setItem("ifconnected:token", data.token);
+        
+        // 3. Usa o objeto 'user' que veio direto na resposta
+        login(data.user); // Atualiza o contexto global
 
-      localStorage.setItem("ifconnected:token", data.token);
-      
-      // Busca o usuário atualizado para conferir o campus
-      // (Isso é necessário se o loginGoogle retornar só o token)
-      // Se loginGoogle já retorna o user, use data.user
-      const user = await api.getMe(); // Você precisa ter esse método ou decodificar do token
-      // Se não tiver getMe implementado fácil, use getUserById com o ID do token.
-      
-      // Lógica de Redirecionamento
-      if (!user.campusId) {
-        // Se não tem campus, manda completar
-        login(user); // Salva no contexto
-        window.location.href = "/complete-profile";
-      } else {
-        // Se já tem, vida normal
-        login(user);
-        window.location.href = "/feed";
+        // 4. Redirecionamento baseado no Campus
+        if (!data.user.campusId) {
+          window.location.href = "/complete-profile";
+        } else {
+          window.location.href = "/feed";
+        }
       }
-      
     } catch (err: any) {
       console.error("Erro Google", err);
       setError("Falha ao autenticar com Google.");
@@ -71,7 +61,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-900 to-sky-900">
       <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-md border border-white/10 dark:border-zinc-800">
@@ -194,3 +183,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
